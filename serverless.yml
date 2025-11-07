@@ -1,0 +1,22 @@
+service: shadowos-api
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    NODE_ENV: production
+
+functions:
+  api:
+    handler: server/aws-lambda.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+      - http:
+          path: /
+          method: ANY
+
+plugins:
+  - serverless-offline

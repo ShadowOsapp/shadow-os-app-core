@@ -1,0 +1,45 @@
+{
+  "name": "@shadowos/core",
+  "version": "0.1.0",
+  "description": "ShadowOS - Privacy-first payment operating system with zero-knowledge cryptography and AI-verified identity",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "example:stealth-payment": "bun run examples/stealth-payment.ts",
+    "example:reputation": "bun run examples/reputation-proof.ts",
+    "example:merchant-bridge": "bun run examples/merchant-bridge.ts",
+    "server:dev": "bun run --watch server/src/index.ts",
+    "server:start": "bun run server/src/server.ts",
+    "server:build": "tsc && bun run build"
+  },
+  "keywords": [
+    "zero-knowledge",
+    "zk-proof",
+    "privacy",
+    "stealth-payments",
+    "x402",
+    "blockchain",
+    "cryptography",
+    "ai-identity",
+    "reputation",
+    "shadowos"
+  ],
+  "author": "ShadowOS Team",
+  "license": "MIT",
+  "dependencies": {
+    "@noble/hashes": "^1.3.3",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "@hono/node-server": "^1.8.0",
+    "@vercel/node": "^3.0.0",
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.0.0"
+  }
+}
+
