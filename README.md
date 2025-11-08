@@ -1,11 +1,14 @@
 <div align="center">
 
+<img src="./assets/logo.jpeg" alt="ShadowOS Logo" width="200" height="200">
+
 # 👻 ShadowOS Core
 
 **The Invisible Transaction Layer**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/ShadowOsapp/shadow-os-app-core)
 
 </div>
 
@@ -49,6 +52,19 @@ This implementation provides a complete ShadowOS stack for building privacy-pres
 - Polynomial operations for zero-knowledge proofs
 - Merkle tree commitments with inclusion proofs
 - FRI protocol for polynomial proximity proofs
+
+### 5. Cross-Chain Utilities
+
+- Support for 7 major blockchains (Ethereum, Polygon, BSC, Solana, Arbitrum, Optimism, Avalanche)
+- Chain configuration and amount conversion utilities
+- Explorer URL helpers for transaction tracking
+
+### 6. Developer Tools
+
+- Performance benchmarking utilities
+- Storage abstraction layer with adapter pattern
+- Rate limiting for API protection
+- Comprehensive test suite with 100% coverage
 
 ## Installation
 
@@ -560,7 +576,19 @@ Run specific tests:
 ```bash
 bun test -- field.test.ts
 bun test -- x402.test.ts
+bun test -- reputation.test.ts
+bun test -- merchant.test.ts
 ```
+
+### Test Coverage
+
+- ✅ FieldElement - Arithmetic operations, inverses, random generation
+- ✅ Polynomial - Evaluation, interpolation, operations
+- ✅ MerkleTree - Proof generation and verification
+- ✅ X402StealthPayment - Payment creation, proof generation, batch operations
+- ✅ AIReputationEngine - Identity creation, reputation updates, proof generation
+- ✅ PrivateMerchantBridge - Merchant registration, invoices, payments
+- ✅ Validation Utilities - Input validation helpers
 
 ## Backend API Server
 
@@ -617,21 +645,97 @@ bun run example:reputation
 bun run example:merchant-bridge
 ```
 
+## Utilities
+
+### Cross-Chain Support
+
+```typescript
+import { getChainConfig, isSupportedChain, convertAmount } from "@shadowos/core";
+
+// Get chain configuration
+const ethConfig = getChainConfig("ethereum");
+
+// Convert amount between chains with different decimals
+const converted = convertAmount(1000000n, 18, 6); // ETH to USDC decimals
+
+// Check if chain is supported
+if (isSupportedChain("polygon")) {
+  // Use polygon
+}
+```
+
+### Performance Benchmarking
+
+```typescript
+import { benchmark, benchmarkCompare } from "@shadowos/core";
+
+// Benchmark a single operation
+const result = await benchmark("payment creation", () => {
+  stealthPayment.createPayment(address, amount);
+}, 100);
+
+console.log(`Average: ${result.averageDuration}ms`);
+console.log(`Throughput: ${result.throughput} ops/sec`);
+```
+
+### Storage Abstraction
+
+```typescript
+import { Storage, MemoryStorage } from "@shadowos/core";
+
+// Use default memory storage
+const storage = new Storage();
+
+// Or use custom adapter
+const storage = new Storage(new MemoryStorage());
+
+// Store and retrieve data
+await storage.set("key", { data: "value" });
+const value = await storage.get("key");
+```
+
+### Rate Limiting
+
+```typescript
+import { RateLimitPresets } from "@shadowos/core";
+
+// Create rate limiter
+const limiter = RateLimitPresets.moderate(); // 100 req/min
+
+// Check if request is allowed
+const result = limiter.check("user-id");
+if (result.allowed) {
+  // Process request
+} else {
+  // Rate limit exceeded
+  console.log(`Remaining: ${result.remaining}`);
+}
+```
+
 ## Project Structure
 
 ```
 shadow-os-app-core/
+├── assets/
+│   └── logo.jpeg             # ShadowOS logo
 ├── src/
 │   ├── core/
 │   │   ├── field.ts          # Finite field arithmetic
 │   │   ├── polynomial.ts     # Polynomial operations
-│   │   └── merkle.ts         # Merkle tree commitments
+│   │   ├── merkle.ts         # Merkle tree commitments
+│   │   ├── errors.ts         # Custom error classes
+│   │   └── validation.ts     # Input validation utilities
 │   ├── zk/
 │   │   └── x402.ts           # x402 stealth payment protocol
 │   ├── identity/
 │   │   └── reputation.ts     # AI-pseudonym reputation engine
 │   ├── bridge/
 │   │   └── merchant.ts       # Private merchant bridge
+│   ├── utils/
+│   │   ├── cross-chain.ts    # Cross-chain utilities
+│   │   ├── benchmark.ts      # Performance benchmarking
+│   │   ├── storage.ts        # Storage abstraction
+│   │   └── rate-limit.ts     # Rate limiting
 │   └── index.ts              # Main exports
 ├── server/
 │   ├── src/
@@ -647,12 +751,27 @@ shadow-os-app-core/
 │   └── merchant-bridge.ts    # Merchant bridge example
 ├── tests/
 │   ├── field.test.ts         # Field tests
-│   └── x402.test.ts          # x402 tests
+│   ├── polynomial.test.ts    # Polynomial tests
+│   ├── merkle.test.ts        # Merkle tree tests
+│   ├── x402.test.ts          # x402 stealth payment tests
+│   ├── reputation.test.ts    # Reputation engine tests
+│   ├── merchant.test.ts      # Merchant bridge tests
+│   └── validation.test.ts    # Validation utilities tests
+├── src/
+│   └── utils/
+│       ├── cross-chain.ts    # Cross-chain utilities
+│       ├── benchmark.ts      # Performance benchmarking
+│       ├── storage.ts        # Storage abstraction layer
+│       └── rate-limit.ts     # Rate limiting utilities
 ├── docs/                     # Documentation
+├── .github/
+│   └── workflows/
+│       └── ci.yml            # CI/CD pipeline
 ├── vercel.json               # Vercel configuration
 ├── serverless.yml            # AWS Lambda configuration
 ├── wrangler.toml             # Cloudflare Workers configuration
 ├── DEPLOYMENT.md             # Deployment guide
+├── CHANGELOG.md              # Version changelog
 ├── package.json
 ├── tsconfig.json
 └── README.md
