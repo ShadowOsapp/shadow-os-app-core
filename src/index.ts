@@ -23,6 +23,12 @@ export {
 // Validation utilities
 export * from "./core/validation";
 
+// Utilities
+export * from "./utils/cross-chain";
+export * from "./utils/benchmark";
+export * from "./utils/storage";
+export * from "./utils/rate-limit";
+
 // Zero-Knowledge x402 Stealth Payments
 export {
   X402StealthPayment,
@@ -46,4 +52,3 @@ export {
   PrivateInvoice,
   PaymentReceipt,
 } from "./bridge/merchant";
-

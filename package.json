@@ -1,6 +1,6 @@
 {
   "name": "@shadowos/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "ShadowOS - Privacy-first payment operating system with zero-knowledge cryptography and AI-verified identity",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
