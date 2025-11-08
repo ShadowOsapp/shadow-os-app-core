@@ -9,6 +9,8 @@ import { FieldElement, SHADOW_PRIME } from "../core/field";
 import { Polynomial } from "../core/polynomial";
 import { MerkleTree, MerkleProof } from "../core/merkle";
 import { sha256 } from "@noble/hashes/sha256";
+import { validateStealthAddress, validateBigInt } from "../core/validation";
+import { ValidationError, ProofError } from "../core/errors";
 
 export interface StealthPayment {
   commitment: Uint8Array;
@@ -43,6 +45,10 @@ export class X402StealthPayment {
     amount: bigint,
     timestamp: bigint = BigInt(Date.now())
   ): StealthPayment {
+    validateStealthAddress(stealthAddress, "stealthAddress");
+    validateBigInt(amount, "amount", 1n);
+    validateBigInt(timestamp, "timestamp", 0n);
+
     const amountField = new FieldElement(amount, SHADOW_PRIME);
 
     // Create commitment: H(stealthAddress || amount || timestamp)
@@ -78,13 +84,15 @@ export class X402StealthPayment {
     publicInput: FieldElement[]
   ): StealthProof {
     if (paymentIndex < 0 || paymentIndex >= this.stealthPayments.length) {
-      throw new Error("Invalid payment index");
+      throw new ProofError(
+        `Invalid payment index: ${paymentIndex}. Must be between 0 and ${this.stealthPayments.length - 1}`
+      );
     }
 
     const payment = this.stealthPayments[paymentIndex];
 
     if (!this.merkleTree) {
-      throw new Error("Merkle tree not initialized");
+      throw new ProofError("Merkle tree not initialized");
     }
 
     const merkleProof = this.merkleTree.getProof(paymentIndex);
@@ -238,5 +246,75 @@ export class X402StealthPayment {
 
   getPaymentCount(): number {
     return this.stealthPayments.length;
+  }
+
+  /**
+   * Create multiple stealth payments in batch
+   * More efficient than calling createPayment multiple times
+   */
+  createBatchPayments(
+    payments: Array<{
+      stealthAddress: Uint8Array;
+      amount: bigint;
+      timestamp?: bigint;
+    }>
+  ): StealthPayment[] {
+    if (payments.length === 0) {
+      throw new ValidationError("Payments array cannot be empty");
+    }
+
+    const createdPayments: StealthPayment[] = [];
+
+    for (const payment of payments) {
+      validateStealthAddress(payment.stealthAddress, "stealthAddress");
+      validateBigInt(payment.amount, "amount", 1n);
+      
+      const timestamp = payment.timestamp ?? BigInt(Date.now());
+      validateBigInt(timestamp, "timestamp", 0n);
+
+      const amountField = new FieldElement(payment.amount, SHADOW_PRIME);
+
+      // Create commitment: H(stealthAddress || amount || timestamp)
+      const commitmentData = new Uint8Array(
+        payment.stealthAddress.length + 32 + 8
+      );
+      commitmentData.set(payment.stealthAddress, 0);
+      commitmentData.set(amountField.toBytes(), payment.stealthAddress.length);
+
+      const timestampBytes = new Uint8Array(8);
+      const timestampView = new DataView(timestampBytes.buffer);
+      timestampView.setBigUint64(0, timestamp, false);
+      commitmentData.set(
+        timestampBytes,
+        payment.stealthAddress.length + 32
+      );
+
+      const commitment = sha256(commitmentData);
+
+      const stealthPayment: StealthPayment = {
+        commitment,
+        stealthAddress: payment.stealthAddress,
+        amount: amountField,
+        timestamp,
+      };
+
+      this.stealthPayments.push(stealthPayment);
+      createdPayments.push(stealthPayment);
+    }
+
+    // Rebuild Merkle tree once for all payments
+    this.rebuildMerkleTree();
+
+    return createdPayments;
+  }
+
+  /**
+   * Get payment by index
+   */
+  getPayment(index: number): StealthPayment | undefined {
+    if (index < 0 || index >= this.stealthPayments.length) {
+      return undefined;
+    }
+    return this.stealthPayments[index];
   }
 }

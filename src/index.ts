@@ -10,6 +10,19 @@ export { FieldElement, SHADOW_PRIME } from "./core/field";
 export { Polynomial } from "./core/polynomial";
 export { MerkleTree, MerkleProof } from "./core/merkle";
 
+// Error classes
+export {
+  ShadowOSError,
+  ValidationError,
+  CryptoError,
+  ProofError,
+  ReputationError,
+  MerchantError,
+} from "./core/errors";
+
+// Validation utilities
+export * from "./core/validation";
+
 // Zero-Knowledge x402 Stealth Payments
 export {
   X402StealthPayment,
@@ -33,3 +46,4 @@ export {
   PrivateInvoice,
   PaymentReceipt,
 } from "./bridge/merchant";
+

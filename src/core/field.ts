@@ -136,8 +136,25 @@ export class FieldElement {
   }
 
   static random(modulus: bigint = SHADOW_PRIME): FieldElement {
+    // Use cryptographically secure random number generation
     const max = modulus - 1n;
-    const randomValue = BigInt(Math.floor(Math.random() * Number(max)));
+    const byteLength = Math.ceil(max.toString(16).length / 2);
+    const randomBytes = new Uint8Array(byteLength);
+    // Use globalThis.crypto for compatibility
+    const cryptoObj = globalThis.crypto || (globalThis as any).crypto;
+    if (!cryptoObj || !cryptoObj.getRandomValues) {
+      throw new Error("crypto.getRandomValues is not available");
+    }
+    cryptoObj.getRandomValues(randomBytes);
+
+    // Convert to bigint and ensure it's within range
+    let randomValue = 0n;
+    for (let i = 0; i < randomBytes.length; i++) {
+      randomValue = (randomValue << 8n) + BigInt(randomBytes[i]);
+    }
+
+    // Ensure value is within valid range
+    randomValue = randomValue % (max + 1n);
     return new FieldElement(randomValue, modulus);
   }
 }

@@ -44,7 +44,10 @@ export class MerkleTree {
     }
   }
 
-  getRoot(): Uint8Array {
+  getRoot(): Uint8Array | undefined {
+    if (this.tree.length === 0 || this.tree[this.tree.length - 1].length === 0) {
+      return undefined;
+    }
     return this.tree[this.tree.length - 1][0];
   }
 
@@ -124,4 +127,5 @@ export class MerkleProof {
     return true;
   }
 }
+
 
