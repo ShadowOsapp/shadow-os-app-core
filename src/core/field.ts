@@ -5,6 +5,8 @@
  * Used for zero-knowledge proof computations
  */
 
+import { constantTimeEqualBigInt } from "../security/constant-time";
+
 // STARK-friendly prime: 2^251 + 17 * 2^192 + 1
 export const SHADOW_PRIME = 2n ** 251n + 17n * 2n ** 192n + 1n;
 
@@ -95,7 +97,11 @@ export class FieldElement {
   }
 
   equals(other: FieldElement): boolean {
-    return this.value === other.value && this.modulus === other.modulus;
+    // Use constant-time comparison for security
+    if (this.modulus !== other.modulus) {
+      return false;
+    }
+    return constantTimeEqualBigInt(this.value, other.value);
   }
 
   isZero(): boolean {

@@ -35,7 +35,7 @@ app.use("*", prettyJSON());
 app.get("/", (c) => {
   return c.json({
     name: "ShadowOS API",
-    version: "0.3.0",
+    version: "0.4.0",
     status: "online",
     endpoints: {
       stealth: "/api/v1/stealth",
